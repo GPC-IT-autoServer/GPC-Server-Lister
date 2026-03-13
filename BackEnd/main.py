@@ -10,11 +10,20 @@ PATH = Path(__file__).resolve().parent
 
 HTML_RESPONSE = PATH / 'Response' / 'index.html'
 
+
+
+
+            #================#
+            #     ROTAS      #
+            #================#
 @app.get("/", response_class=FileResponse)
 async def root():
     return FileResponse(path=HTML_RESPONSE)
 
 
+@app.get("/")
+async def root():
+    return {}
 
 
 

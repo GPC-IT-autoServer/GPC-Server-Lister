@@ -5,7 +5,7 @@ from google.oauth2.service_account import Credentials
 DIRETORIO_ATUAL = Path(__file__).resolve().parent
 
 
-AUTH_PATH = DIRETORIO_ATUAL / 'Data' / 'elated-coil-490113-n2-0a97f7027a26.json'
+AUTH_PATH = DIRETORIO_ATUAL / 'Data' / 'AUTH.json'
 
 scopes = ['https://www.googleapis.com/auth/drive']
 
