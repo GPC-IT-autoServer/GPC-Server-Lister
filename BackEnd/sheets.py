@@ -17,4 +17,4 @@ sheetID = "1m-QxfHDEthX1-wS7l15ilTp2Ah1m2Sn4UyOXp4AI3u8"
 
 sheet = client.open_by_key(sheetID)
 
-print(sheet.sheet1.row_values(1))
+print(sheet.sheet1.get_all_values())

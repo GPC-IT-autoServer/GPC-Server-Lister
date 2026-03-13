@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Root | GPC Server Lister</title>
+    
+    <style>
+        /* ====================
+              PALETA DE CORES 
+           ==================== */
+        :root {
+            --cor-fundo-tela: #df006c;      
+            --cor-caixa: #ffc5ef;           
+            --cor-sombra: #f265ffa0;         
+            
+            --cor-texto-titulo: #f21e73;   
+            --cor-texto-p: #d11e83;         
+            --cor-status-online: #cf70ff;   
+            
+            --cor-botao-1: #f383c1;         
+            --cor-botao-2: #9c02a7;         
+            --cor-botao-hover: #ffc7e3;     
+        }
+
+        /* =====================
+              ESTILOS GERAIS
+           =====================*/
+        body {
+            background-color: var(--cor-fundo-tela);
+            margin: 0;
+            padding-top: 5vh;
+            font-family: 'Roboto', sans-serif;
+            color: var(--cor-texto-titulo);
+        }
+
+        .caixa {
+            background-color: var(--cor-caixa);
+            border-radius: 15px;
+            box-shadow: 0 0 20px var(--cor-sombra); 
+            width: 80%;
+            margin: 0 auto; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .caixa-cabecalho {
+            height: 20vh;
+        }
+
+        .caixa-conteudo {
+            height: 40vh;
+            flex-direction: column;
+            margin-top: 5vh;
+        }
+
+        h2 { margin: 0; }
+        
+        .titulo-principal { font-size: 2.5em; font-weight: bold; }
+        .titulo-secundario { font-size: 2em; }
+        
+        .texto-apoio {
+            color: var(--cor-texto-p);
+            font-size: 1.2em;
+            margin-top: 15px;
+        }
+
+        .status-online {
+            color: var(--cor-status-online);
+            text-shadow: 0 0 10px var(--cor-status-online); 
+        }
+
+        .container-botoes {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 5vh;
+        }
+
+        .botao {
+            padding: 0.8rem 1.5rem;
+            border-radius: 15px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .botao-primario { background-color: var(--cor-botao-1); }
+        .botao-secundario { background-color: var(--cor-botao-2); border: 2px solid var(--cor-sombra); }
+
+
+        .botao:hover {
+            transform: translateY(-3px); 
+            background-color: var(--cor-botao-hover);
+            box-shadow: 0 0 15px var(--cor-botao-hover);
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="caixa caixa-cabecalho">
+        <h2 class="titulo-principal">Bem vindo(a) ao root da API!</h2>
+    </div>
+
+    <div class="caixa caixa-conteudo">
+        <h2 class="titulo-secundario">
+            Status do Servidor: <span class="status-online">Online</span>
+        </h2>
+        <p class="texto-apoio">Mais informações sobre o projeto disponíveis abaixo!</p>
+    </div>
+
+    <div class="container-botoes" style="">
+        <a href="/docs" class="botao botao-primario">Endpoints</a>
+        
+        <a href="https://github.com/GPC-IT-autoServer/GPC-Server-Lister/tree/main" class="botao botao-primario">GitHub</a>
+    </div>
+</body>
+</html>

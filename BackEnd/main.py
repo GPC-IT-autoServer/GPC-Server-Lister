@@ -1,12 +1,19 @@
 from fastapi import FastAPI
 import uvicorn
+import sheets 
+from fastapi.responses import FileResponse
+from pathlib import Path
 
 app = FastAPI()
 
+PATH = Path(__file__).resolve().parent
 
-@app.get("/")
+HTML_RESPONSE = PATH / 'Response' / 'index.html'
+
+@app.get("/", response_class=FileResponse)
 async def root():
-    return {"message": "Hello World"}
+    return FileResponse(path=HTML_RESPONSE)
+
 
 
 
