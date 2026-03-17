@@ -28,17 +28,23 @@ async def root():
 async def listar_servidores(
     modelo: Optional[str] = None,
     marca: Optional[str] = None,
-    gen: Optional[str] = None, #String, pois temos alguns casos como V1 ou V2
+    gen: Optional[str] = None,   #String, pois temos alguns casos como V1 ou V2
     variante: Optional[str] = None,
     qtd: Optional[int] = None,
+    qtd_min: Optional[int] = 0,
+    qtd_max: Optional[int] = 999,
     bays: Optional[int] = None,
+    bays_min: Optional[int] = 0,
+    bays_max: Optional[int] = 999,
     bay_size: Optional[float] = None,
     extra_bays: Optional[str] = None,
     rails : Optional[bool] = None,
     bezel: Optional[bool] = None,
     notas: Optional[str] = None,
 ):
-    dados = pd.DataFrame(sheets.ListarServidores())
+    dadosRaw = pd.DataFrame(sheets.ListarServidores())
+
+    dadosCache = dadosRaw
     filtros = {
         "modelo": modelo,
         "marca": marca,
@@ -56,11 +62,25 @@ async def listar_servidores(
     filtros_ativos = {coluna: valor for coluna, valor in filtros.items() if valor is not None}
 
     for coluna, valor in filtros_ativos.items():
-        dados = dados[dados[coluna] == valor]
+        if isinstance(valor, str):
+            dadosCache = dadosCache[dadosCache[coluna].astype(str).str.contains(valor, case=False, na=False)]
+        else:
+            dadosCache = dadosCache[dadosCache[coluna] == valor]
+
+
+    if qtd is not None: dadosCache = dadosCache[dadosCache['qtd'] == qtd]
+    else:
+        if qtd_min is not None: dadosCache = dadosCache[dadosCache['qtd'] >= qtd_min]
+        if qtd_max is not None: dadosCache = dadosCache[dadosCache['qtd'] <= qtd_max]
+
+    if bays is not None: dadosCache = dadosCache[dadosCache['bays'] == bays]
+    else:
+        if bays_min is not None: dadosCache = dadosCache[dadosCache['bays'] >= bays_min]
+        if bays_max is not None: dadosCache = dadosCache[dadosCache['bays'] <= bays_max]
 
     return {
-        "total_encontrado": len(dados), 
-        "servidores": dados.to_dict(orient="records")
+        "total_encontrado": len(dadosCache), 
+        "servidores": dadosCache.to_dict(orient="records")
     }
 
 
