@@ -7,7 +7,7 @@ class Cache:
         self.dados = None
 
     def updateCache(self):
-        self.dados = pd.DataFrame(sheets.listarServidores())
+        self.dados = pd.DataFrame(sheets.listServers())
 
     def getCache(self):
         if self.dados is None: self.updateCache()

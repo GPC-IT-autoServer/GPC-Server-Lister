@@ -17,24 +17,44 @@ sheetID = "1m-QxfHDEthX1-wS7l15ilTp2Ah1m2Sn4UyOXp4AI3u8"
 
 sheet = client.open_by_key(sheetID)
 
-def listarServidores():
+def listServers():
     return sheet.sheet1.get_all_records()
 
+def updateServer(row,dados,page):
+    page = sheet.sheet1
+    headers = page.row_values(1)
+    for col, new_value in dados.items():
+        if isinstance(new_value,bool):
+            new_value = int(new_value)
 
-def atualizarServidor(row,dados,aba):
-    aba = sheet.sheet1
-    headers = aba.row_values(1)
-    for nome_coluna, novo_valor in dados.items():
+        target_col_idx = headers.index(col) + 1
 
-        col_alvo_index = headers.index(nome_coluna) + 1
-
-        aba.update_cell(row, col_alvo_index, novo_valor)
+        page.update_cell(row, target_col_idx, new_value)
             
     return {"status": 200}
 
-def listarServidor(ID,aba):
-    aba = sheet.sheet1
-    headers = aba.row_values(1)
+def listarServidor(ID,page):
+    page = sheet.sheet1
+    headers = page.row_values(1)
     col_id = headers.index('id') + 1
-    found = aba.find(str(ID), in_column=col_id)
+
+    found = page.find(str(ID), in_column=col_id)
     return found.row
+
+def addServer(ID,dados,page):
+    page = sheet.sheet1
+    headers = page.row_values(1)
+    new_row = [""] * len(headers)
+    idx_id = headers.index("id")
+
+    new_row[idx_id] = ID
+
+    for col, val in dados.items():
+        if isinstance(val,bool):
+            val = int(val)
+        if col in headers:
+            idx_coluna = headers.index(col)
+            new_row[idx_coluna] = val
+
+    page.append_row(new_row)
+    return{"status":201}

@@ -34,7 +34,12 @@ class DadosServerListar(DadosServerBase):
 
 
 class DadosServerCriar(DadosServerBase):
-    pass
+    extra_bays: str| None = None
+    rails : bool          = 0
+    bezel: bool           = 0
+    notas: str     | None = None
+    variante: str  | None = None
+    gen: str       | None = None
 
 class DadosServerAtualizar(DadosServerBase):
     modelo: str    | None = None
