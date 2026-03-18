@@ -21,4 +21,5 @@ router.add_api_route("/lista", serv.listarServidores, methods=["GET"])
 
 #router.add_api_route("/remove",?, methods=["DELETE"])
 
-#router.add_api_route("/update",?, methods=["PUT"])
+#Atualiza um servidor com base no ID fornecido
+router.add_api_route("/atualizar/{serverID}",serv.AtualizarServidor, methods=["PUT"])
