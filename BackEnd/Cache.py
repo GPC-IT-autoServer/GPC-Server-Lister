@@ -1,16 +1,14 @@
 import pandas as pd
 import sheets 
 
-class Cache(object):
+class Cache:
 
     def __init__(self):
-        self.dados 
-        self.MinutesToLive = 5
-        self.ttl = self.SecondsToLive * 60
+        self.dados = None
 
     def updateCache(self):
         self.dados = pd.DataFrame(sheets.ListarServidores())
 
     def getCache(self):
-        if not self.dados: self.updateSheet()
+        if self.dados is None: self.updateCache()
         return self.dados

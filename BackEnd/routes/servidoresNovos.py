@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from typing import Optional
 import services.ServidoresNovos as serv
 
 router = APIRouter()
@@ -11,10 +10,15 @@ router = APIRouter()
         #============================#
 
 
+#Webhook - atualização na planilha
+#Atualiza o cache do servidor
+router.add_api_route("/webhook/atualizar-cache", serv.updateCacheSheets, methods=["POST"])
+
+#Retorna a lista de servidores
 router.add_api_route("/lista", serv.listarServidores, methods=["GET"])
 
-#@router.post("/add")
+#router.add_api_route("/add",?, methods=["POST"])
 
-#@router.delete("/remove/{id}")
+#router.add_api_route("/remove",?, methods=["DELETE"])
 
-#@router.put("/update")
+#router.add_api_route("/update",?, methods=["PUT"])
