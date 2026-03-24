@@ -33,7 +33,6 @@ async def listServers(server: DadosServerListar = Depends()):
         else:
             cachedSheet = cachedSheet[cachedSheet[coluna] == valor]
 
-
     if server.qtd is not None: cachedSheet = cachedSheet[cachedSheet['qtd'] == server.qtd]
     else:
         if server.qtd_min is not None: cachedSheet = cachedSheet[cachedSheet['qtd'] >= server.qtd_min]
@@ -61,7 +60,11 @@ async def updateServer(serverID : int,server: DadosServerAtualizar):
     
     dados = server.model_dump(exclude_unset=True)
     row = sheets.listarServidor(serverID,page)
-    sheets.updateServer(row,dados,page)
+    dados['qtd'] += row['qtd']
+    if dados['qtd'] <= 0:
+        print("PLACEHOLDER: APAGAR SERVER")
+    else:
+        sheets.updateServer(row,dados,page)
 
     
     return{"status": 200}
@@ -77,11 +80,35 @@ async def addServer(server: DadosServerCriar):
     page=None #placeholder
     cachedSheet = pd.DataFrame(Cache.getCache())
     newID = int(cachedSheet['id'].max()) +1
-    dados = server.model_dump(exclude_unset=True)
 
-    if not sheets.addServer(newID,dados,page):
-        raise HTTPException(status_code=400, detail="Erro indefinido")
-    return{"status":201, "message": "servidor registrado com sucesso!"}
+    cacheComparation = cachedSheet.drop(columns = ['id'])
+    cacheComparation = cacheComparation.drop(columns = ['qtd'])
+
+    targetData = server.model_dump()
+
+    targetValues = pd.Series(targetData).reindex(cacheComparation.columns)
+
+    targetComparation = targetValues.drop(columns = ['qtd']).astype(str).str.lower().str.strip()
+
+    print(targetComparation)
+    print(cacheComparation)
+
+    rowMatch = (cacheComparation.fillna('') == targetComparation.fillna('')).all(axis=1)
+    print(rowMatch)
+
+    if not rowMatch.any():
+        dados = server.model_dump(exclude_unset=True)
+        if not sheets.addServer(newID,dados,page):
+            raise HTTPException(status_code=400, detail="Erro indefinido,confira se todos os paramêtros estão corretos")
+        return{"status":201, "message": "servidor registrado com sucesso!"}
+    
+    matchRow = cachedSheet[rowMatch]
+    matchID = matchRow['id'].iloc[0]
+
+    updateServer(matchID,{'qtd':server['qtd']})
+
+    
+    
 
 #--DELETE--
 #async def DeletarServidores():

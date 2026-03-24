@@ -1,24 +1,23 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, model_validator
 
-
-#Classes
 class DadosServerBase(BaseModel):
     modelo: str
     marca: str
-    gen: str        #String, pois temos alguns casos como V1 ou V2
-    variante: str
+    gen: str | None = None        
+    variante: str | None = None
     qtd: int
     bays: int
     bay_size: float 
-    extra_bays: str
-    rails : bool
-    bezel: bool
-    notas: str
+    extra_bays: str | None = None
+    rails : bool = False
+    bezel: bool = False
+    notas: str | None = None
+
 
 class DadosServerListar(DadosServerBase):
     modelo: str    | None = None
     marca: str     | None = None
-    gen: str       | None = None       #String, pois temos alguns casos como V1 ou V2
+    gen: str       | None = None
     variante: str  | None = None
     qtd: int       | None = None
     qtd_min: int          = 0
@@ -34,17 +33,48 @@ class DadosServerListar(DadosServerBase):
 
 
 class DadosServerCriar(DadosServerBase):
-    extra_bays: str| None = None
-    rails : bool          = 0
-    bezel: bool           = 0
-    notas: str     | None = None
-    variante: str  | None = None
-    gen: str       | None = None
+    qtd: int        = Field(1, gt=0)
+    bays: int       = Field(4, gt=3)
+    bay_size: float = Field(2.5, gt=2.4)
+
+
+    @model_validator(mode='before')
+    @classmethod
+    def createFilter(cls, dados: dict):
+        fail = []
+        if not isinstance(dados, dict):
+            return dados
+        
+        for campo in ['marca', 'modelo']:
+            valor = dados.get(campo)
+            if isinstance(valor, str):
+                if valor.strip() == "string" or valor.strip() == "":
+                    fail.append(campo)
+                    
+        dif = ['qtd','bays','bay_size'] - dados.keys()
+        if dif:
+            for v in dif:
+                fail.append(v)
+
+        for campo in ['gen', 'variante', 'extra_bays', 'notas']:
+            valor = dados.get(campo)
+            if isinstance(valor, str) and valor == "string":
+                dados[campo] = ""
+
+        for campo in ['bezel','rails']:
+            valor = dados.get(campo)
+            if not isinstance(valor,bool):
+                dados[campo] = False
+
+        if fail:        
+            raise ValueError(f"por favor, preencha o(s) campo(s) '{fail}'")
+        
+        return dados
 
 class DadosServerAtualizar(DadosServerBase):
     modelo: str    | None = None
     marca: str     | None = None
-    gen: str       | None = None       #String, pois temos alguns casos como V1 ou V2
+    gen: str       | None = None
     variante: str  | None = None
     qtd: int       | None = None
     bays: int      | None = None
@@ -53,4 +83,3 @@ class DadosServerAtualizar(DadosServerBase):
     rails : bool   | None = None
     bezel: bool    | None = None
     notas: str     | None = None
-

@@ -50,8 +50,6 @@ def addServer(ID,dados,page):
     new_row[idx_id] = ID
 
     for col, val in dados.items():
-        if isinstance(val,bool):
-            val = int(val)
         if col in headers:
             idx_coluna = headers.index(col)
             new_row[idx_coluna] = val
