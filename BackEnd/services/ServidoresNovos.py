@@ -1,6 +1,5 @@
 import pandas as pd
 import Cache as cache
-import sheets
 from fastapi import Depends, HTTPException
 from schemas import DadosServerListar, DadosServerCriar, DadosServerAtualizar
 
