@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field, model_validator
+from datetime import datetime
 
 class DadosServerBase(BaseModel):
     modelo: str
@@ -83,3 +84,13 @@ class DadosServerAtualizar(DadosServerBase):
     rails : bool   | None = None
     bezel: bool    | None = None
     notas: str     | None = None
+
+
+# Schema para respostas do banco de dados (inclui ID e timestamps)
+class DadosServerDB(DadosServerBase):
+    id: int
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+    class Config:
+        from_attributes = True  # Permite construir a partir de objetos do SQLAlchemy/ORM
