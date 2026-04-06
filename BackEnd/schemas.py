@@ -1,21 +1,28 @@
+from fastapi.params import Query
 from pydantic import BaseModel, Field, model_validator
 from datetime import datetime
+from enum import Enum
+
+class SizeEnum(str, Enum):
+    small = "SFF"
+    large = "LFF"
+
 
 class DadosServerBase(BaseModel):
-    modelo: str
-    marca: str
-    gen: str | None = None        
-    variante: str | None = None
-    qtd: int
-    baias_sas_sata: int
-    baias_nvme : int | None = None
-    tamanho_baias_sas_sata: str
-    tamanho_baias_traseiras_sas_sata: str | None = None
-    baias_traseiras_sas_sata: int | None = None
-    baias_traseiras_nvme: int | None = None
-    trilhos : bool = False
+    modelo: str = Field(..., description="Modelo (ex: R640)")
+    marca: str = Field(..., description="Marca (ex: Dell)")
+    gen: str | None = Field(default=None, description="Geração (ex: Gen10)")
+    variante: str = Field(..., description="Variante (ex: xd)")
+    qtd: int = Field(..., description="Quantidade de baias")
+    baias_sas_sata: int | None = Field(default=None, description="Número de baias SAS/SATA")
+    baias_nvme: int | None = Field(default=None, description="Número de baias NVMe")
+    tamanho_baias_sas_sata: SizeEnum | None = Field(default=None, description="Tamanho das baias SAS/SATA")
+    tamanho_baias_traseiras_sas_sata: SizeEnum | None = Field(default=None, description="Tamanho das baias traseiras SAS/SATA")
+    baias_traseiras_sas_sata: int | None = Field(default=None, description="Número de baias traseiras SAS/SATA")
+    baias_traseiras_nvme: int | None = Field(default=None, description="Número de baias traseiras NVMe")
+    trilhos: bool = False
     bezel: bool = False
-    notas: str | None = None
+    notas: str | None = Field(default=None, description="Notas adicionais, como avarias")
 
 
 class DadosServerListar(DadosServerBase):
@@ -32,8 +39,9 @@ class DadosServerListar(DadosServerBase):
     baias_sas_sata_max: int            = 999
     baias_nvme_min: int                = 0
     baias_nvme_max: int                = 999
-    tamanho_baias_sas_sata: str | None = None
-    tamanho_baias_traseiras_sas_sata: str | None = None
+    incluir_traseiras: bool            = True
+    tamanho_baias_sas_sata: SizeEnum | None = None
+    tamanho_baias_traseiras_sas_sata: SizeEnum | None = None
     baias_traseiras_sas_sata:int| None = None
     baias_traseiras_nvme: int   | None = None
     trilhos : bool              | None = None
@@ -42,10 +50,9 @@ class DadosServerListar(DadosServerBase):
 
 
 class DadosServerCriar(DadosServerBase):
-    qtd: int        = Field(1, gt=0)
-    baias: int       = Field(4, gt=3)
-    tamanho_baias: float = Field(2.5, gt=2.4)
-
+    qtd: int = Field(1, gt=0)
+    baias: int = Field(4, gt=3)
+    tamanho_baias: SizeEnum = Field(default=SizeEnum.small, description="Tamanho das baias, SFF se vazio")
 
     @model_validator(mode='before')
     @classmethod
@@ -60,7 +67,7 @@ class DadosServerCriar(DadosServerBase):
                 if valor.strip() == "string" or valor.strip() == "":
                     fail.append(campo)
                     
-        dif = ['qtd','baias','tamanho_baias'] - dados.keys()
+        dif = {"qtd", "baias", "tamanho_baias"} - dados.keys()
         if dif:
             for v in dif:
                 fail.append(v)
@@ -72,7 +79,7 @@ class DadosServerCriar(DadosServerBase):
 
         for campo in ['bezel','trilhos']:
             valor = dados.get(campo)
-            if not isinstance(valor,bool):
+            if not isinstance(valor, bool):
                 dados[campo] = False
 
         if fail:        
@@ -80,34 +87,34 @@ class DadosServerCriar(DadosServerBase):
         
         return dados
 
+
 class DadosServerAtualizar(DadosServerBase):
-    gen: str       | None = None
-    variante: str  | None = None
-    qtd: int       | None = None
-    tamanho_baias: float| None = None
-    baias_traseiras: str| None = None
-    trilhos : bool   | None = None
-    bezel: bool    | None = None
-    notas: str     | None = None
+    gen: str | None = None
+    variante: str | None = None
+    qtd: int | None = None
+    tamanho_baias: SizeEnum | None = None
+    baias_traseiras: int | None = None
+    trilhos: bool | None = None
+    bezel: bool | None = None
+    notas: str | None = None
 
-@model_validator(mode='before')
-@classmethod
-def createFilter(cls, dados: dict):
-    if not isinstance(dados, dict):
+    @model_validator(mode='before')
+    @classmethod
+    def createFilter(cls, dados: dict):
+        if not isinstance(dados, dict):
+            return dados
+        
+        for campo in ['gen', 'variante', 'baias_traseiras','baias_traseiras_nvme','notas']:
+            valor = dados.get(campo)
+            if isinstance(valor, str) and valor == "string":
+                dados[campo] = ""
+
+        for campo in ['bezel','trilhos']:
+            valor = dados.get(campo)
+            if not isinstance(valor, bool):
+                dados[campo] = False
+
         return dados
-    
-    for campo in ['gen', 'variante', 'baias_traseiras','baias_traseiras_nvme','notas']:
-        valor = dados.get(campo)
-        if isinstance(valor, str) and valor == "string":
-            dados[campo] = ""
-
-    for campo in ['bezel','trilhos']:
-        valor = dados.get(campo)
-        if not isinstance(valor,bool):
-            dados[campo] = False
-
-    
-    return dados
 
 # Schema para respostas do banco de dados (inclui ID e timestamps)
 class DadosServerDB(DadosServerBase):
