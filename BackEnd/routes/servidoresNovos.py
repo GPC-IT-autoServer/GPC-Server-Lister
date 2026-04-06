@@ -24,7 +24,8 @@ router.add_api_route("/servidores", serv.listServers, methods=["GET"])
 
 #--DELETE--
 
-#router.add_api_route("/servidor/{serverID}", serv.deleteServer, methods=["DELETE"])
+#Deleta um servidor por ID
+router.add_api_route("/servidor/{serverID}", serv.deleteServer, methods=["DELETE"])
 
 
 #--PUT--

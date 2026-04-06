@@ -9,12 +9,6 @@ async def listServers(server: DadosServerListar = Depends()):
 
     filtros = server.model_dump(exclude_none=True)
 
-    qtd_min = filtros.pop("qtd_min", None)
-    qtd_max = filtros.pop("qtd_max", None)
-    
-    bays_min = filtros.pop("bays_min", None)
-    bays_max = filtros.pop("bays_max", None)
-
     resultados = database.getServerWithFilter(filtros)
 
     return {
@@ -26,7 +20,10 @@ async def listServers(server: DadosServerListar = Depends()):
 #--PUT--
 #Atualiza uma linha
 async def updateServer(serverID : int,server: DadosServerAtualizar):
-
+    dados = server.model_dump(exclude_none=True)
+    sucesso = database.postServer(serverID, dados)
+    if not sucesso:
+        raise HTTPException(status_code=400, detail="Erro ao atualizar servidor")
     
     return{"status": 200}
      
@@ -36,13 +33,25 @@ async def updateServer(serverID : int,server: DadosServerAtualizar):
 
 #Adiciona uma nova linha
 async def addServer(server: DadosServerCriar):
-    return{"status": 200}
-    #updateServer(matchID,{'qtd':server['qtd']})
+
+    dados = server.model_dump(exclude_none=True)
+
+    sucesso = database.createServer(dados)
+
+    if not sucesso:
+        raise HTTPException(status_code=500, detail="Erro ao adicionar servidor")
+    
+    return{"status": 200,
+    "message": "Servidor adicionado com sucesso"}
+    
 
     
     
 
 #--DELETE--
-#async def DeletarServidores():
-
-
+async def deleteServer(server_id: int):
+    sucesso = database.deleteServer(server_id)
+    if not sucesso:
+        raise HTTPException(status_code=404, detail="Servidor não encontrado")
+    return {"status": 200, 
+            "message": "Servidor deletado com sucesso"}

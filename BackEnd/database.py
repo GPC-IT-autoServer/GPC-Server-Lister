@@ -29,10 +29,24 @@ def getServerByID(server_id: int) -> Dict[str, Any]:
 def getServerWithFilter(filters: Dict[str, Any]) -> List[Dict[str, Any]]:
     query = supabase.table("server_models").select("*")
     
+    qtd_min = filters.pop("qtd_min", None)
+    qtd_max = filters.pop("qtd_max", None)
+    
+    baias_min = filters.pop("baias_min", None)
+    baias_max = filters.pop("baias_max", None)
+
     for key, value in filters.items():
         if value is not None:
             query = query.eq(key, value)
-    
+
+    if "qtd" not in filters: 
+        if qtd_min is not None: query = query.gte("qtd", qtd_min)
+        if qtd_max is not None: query = query.lte("qtd", qtd_max)
+
+    if "baias" not in filters:
+        if baias_min is not None: query = query.gte("baias", baias_min)
+        if baias_max is not None: query = query.lte("baias", baias_max)      
+        
     response = query.execute()
     return response.data
 
@@ -55,7 +69,10 @@ def postServer(server_id: int, dados: Dict[str, Any]) -> bool:
             else:
                 dados_formatados[col] = new_value
         
-        supabase.table("server_models").update(dados_formatados).eq("id", server_id).execute()
+        success = supabase.table("server_models").update(dados_formatados).eq("id", server_id).execute()
+        
+        if not success.data:
+            return False
         return True
     except Exception as e:
         print(f"Erro ao atualizar servidor: {e}")
@@ -64,9 +81,14 @@ def postServer(server_id: int, dados: Dict[str, Any]) -> bool:
 
 def deleteServer(server_id: int) -> bool:
     try:
-        supabase.table("server_models").delete().eq("id", server_id).execute()
+        found = supabase.table("server_models").delete().eq("id", server_id).execute()
+
+        if not found.data:
+            return False
+        
         return True
     except Exception as e:
+
         print(f"Erro ao deletar servidor: {e}")
         return False
 
