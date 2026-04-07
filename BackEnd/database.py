@@ -31,9 +31,14 @@ def getServerWithFilter(filters: Dict[str, Any]) -> List[Dict[str, Any]]:
     
     qtd_min = filters.pop("qtd_min", None)
     qtd_max = filters.pop("qtd_max", None)
+
+    incluir_traseiras = filters.pop("incluir_traseiras", None)
     
-    baias_min = filters.pop("baias_min", None)
-    baias_max = filters.pop("baias_max", None)
+    baias_sas_sata_min = filters.pop("baias_sas_sata_min", None)
+    baias_sas_sata_max = filters.pop("baias_sas_sata_max", None)
+
+    baias_nvme_min = filters.pop("baias_nvme_min", None)
+    baias_nvme_max = filters.pop("baias_nvme_max", None)
 
     for key, value in filters.items():
         if value is not None:
@@ -43,10 +48,25 @@ def getServerWithFilter(filters: Dict[str, Any]) -> List[Dict[str, Any]]:
         if qtd_min is not None: query = query.gte("qtd", qtd_min)
         if qtd_max is not None: query = query.lte("qtd", qtd_max)
 
-    if "baias" not in filters:
-        if baias_min is not None: query = query.gte("baias", baias_min)
-        if baias_max is not None: query = query.lte("baias", baias_max)      
+    if "baias_sas_sata" not in filters:
+        if incluir_traseiras:
+            if baias_sas_sata_min is not None: query = query.gte("total_baias_sata", baias_sas_sata_min)
+            if baias_sas_sata_max is not None: query = query.lte("total_baias_sata", baias_sas_sata_max)
+                  
+        else:
+            if baias_sas_sata_min is not None: query = query.gte("baias_sas_sata", baias_sas_sata_min)
+            if baias_sas_sata_max is not None: query = query.lte("baias_sas_sata", baias_sas_sata_max)      
         
+    if "baias_nvme" not in filters:
+        if incluir_traseiras is not None:
+            if incluir_traseiras:
+                if baias_nvme_min is not None: query = query.gte("total_baias_nvme", baias_nvme_min)
+                if baias_nvme_max is not None: query = query.lte("total_baias_nvme", baias_nvme_max)
+
+            else:
+                if baias_nvme_min is not None: query = query.gte("baias_nvme", baias_nvme_min)
+                if baias_nvme_max is not None: query = query.lte("baias_nvme", baias_nvme_max)
+
     response = query.execute()
     return response.data
 

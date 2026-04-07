@@ -51,8 +51,8 @@ class DadosServerListar(DadosServerBase):
 
 class DadosServerCriar(DadosServerBase):
     qtd: int = Field(1, gt=0)
-    baias: int = Field(4, gt=3)
-    tamanho_baias: SizeEnum = Field(default=SizeEnum.small, description="Tamanho das baias, SFF se vazio")
+    baias_sas_sata: int = Field(default=4, ge=0)
+    tamanho_baias_sas_sata: SizeEnum = Field(default=SizeEnum.small, description="Tamanho das baias, SFF se vazio")
 
     @model_validator(mode='before')
     @classmethod
@@ -67,12 +67,12 @@ class DadosServerCriar(DadosServerBase):
                 if valor.strip() == "string" or valor.strip() == "":
                     fail.append(campo)
                     
-        dif = {"qtd", "baias", "tamanho_baias"} - dados.keys()
+        dif = {"qtd","tamanho_baias_sas_sata"} - dados.keys()
         if dif:
             for v in dif:
                 fail.append(v)
 
-        for campo in ['gen', 'variante', 'baias_traseiras','baias_traseiras_nvme', 'notas']:
+        for campo in ['gen', 'variante', 'baias_traseiras_sas_sata','baias_traseiras_nvme', 'notas']:
             valor = dados.get(campo)
             if isinstance(valor, str) and valor == "string":
                 dados[campo] = ""
@@ -87,12 +87,33 @@ class DadosServerCriar(DadosServerBase):
         
         return dados
 
+    @model_validator(mode='after')
+    def validar_minimo_baias(self):
+
+        sas_sata = self.baias_sas_sata or 0
+        nvme = self.baias_nvme or 0
+        
+        total_baias = sas_sata + nvme
+        
+        if total_baias < 4:
+            raise ValueError(
+                f"Por favor, informe uma quantidade de baias válida (min 4)"
+            )
+     
+        if not self.baias_traseiras_sas_sata:
+            self.tamanho_baias_traseiras_sas_sata = None
+            
+        if not self.baias_sas_sata:
+            self.tamanho_baias_sas_sata = None
+            
+        return self
+
 
 class DadosServerAtualizar(DadosServerBase):
     gen: str | None = None
     variante: str | None = None
     qtd: int | None = None
-    tamanho_baias: SizeEnum | None = None
+    tamanho_baias_sas_sata: SizeEnum | None = None
     baias_traseiras: int | None = None
     trilhos: bool | None = None
     bezel: bool | None = None
