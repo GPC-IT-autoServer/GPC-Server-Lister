@@ -108,13 +108,11 @@ class DadosServerCriar(DadosServerBase):
             
         return self
 
-
-class DadosServerAtualizar(DadosServerBase):
-    gen: str | None = None
-    variante: str | None = None
+class DadosServerAtualizar(BaseModel):
     qtd: int | None = None
-    tamanho_baias_sas_sata: SizeEnum | None = None
     baias_traseiras: int | None = None
+    baias_traseiras_nvme: int | None = Field(default=None, description="Número de baias traseiras NVMe")
+    tamanho_baias_traseiras_sas_sata: SizeEnum | None = Field(default="", description="Tamanho das baias traseiras SAS/SATA")
     trilhos: bool | None = None
     bezel: bool | None = None
     notas: str | None = None
@@ -125,15 +123,16 @@ class DadosServerAtualizar(DadosServerBase):
         if not isinstance(dados, dict):
             return dados
         
-        for campo in ['gen', 'variante', 'baias_traseiras','baias_traseiras_nvme','notas']:
+        for campo in ['baias_traseiras','baias_traseiras_nvme','notas']:
             valor = dados.get(campo)
             if isinstance(valor, str) and valor == "string":
                 dados[campo] = ""
 
         for campo in ['bezel','trilhos']:
-            valor = dados.get(campo)
-            if not isinstance(valor, bool):
-                dados[campo] = False
+            if campo in dados:
+                valor = dados.get(campo)
+                if not isinstance(valor, bool):
+                    dados[campo] = False
 
         return dados
 

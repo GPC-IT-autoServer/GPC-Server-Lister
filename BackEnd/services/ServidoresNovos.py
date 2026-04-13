@@ -19,13 +19,31 @@ async def listServers(server: DadosServerListar = Depends()):
 
 #--PUT--
 #Atualiza uma linha
-async def updateServer(serverID : int,server: DadosServerAtualizar):
+async def updateServer(serverID: int, server: DadosServerAtualizar):
     dados = server.model_dump(exclude_none=True)
-    sucesso = database.postServer(serverID, dados)
+
+    if not dados:
+        return {"status": 200, "message": "Pedido vazio"}
+
+    server = database.getServerByID(serverID)
+    if not server:
+        raise HTTPException(status_code=404, detail="Servidor não encontrado")
+
+    dados_update = {}
+    for chave, valor_novo in dados.items():
+        valor_limpo = valor_novo.value if hasattr(valor_novo, "value") else valor_novo
+        
+        if server.get(chave) != valor_limpo:
+            dados_update[chave] = valor_limpo
+
+    if not dados_update:
+        return {"status": 200, "message": "Pedido vazio e/ou sem alterações."}
+
+    sucesso = database.postServer(serverID, dados_update)
     if not sucesso:
         raise HTTPException(status_code=400, detail="Erro ao atualizar servidor")
     
-    return{"status": 200}
+    return {"status": 200, "message": "Servidor atualizado com sucesso", "atualizados": dados_update}
      
 
 
